@@ -12,10 +12,10 @@ pub struct Structure {
 }
 
 #[derive(Deserialize, Debug, Insertable)]
-#[table_name = "properties"]
+#[table_name = "molecule_properties"]
 pub struct NewProperties {
+    pub model_id: i32,
     pub molecule_id: i32,
     pub energy: Option<f64>,
-    pub chemical_model: String,
 }
 // models.rs:1 ends here

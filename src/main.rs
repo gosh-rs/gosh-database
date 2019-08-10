@@ -14,7 +14,7 @@ use quicli::prelude::*;
 type Result<T> = ::std::result::Result<T, Error>;
 
 fn main() -> Result<()> {
-    use gosh_db::schema::properties::dsl::*;
+    use gosh_db::schema::molecule_properties::dsl::*;
 
     dotenv::dotenv().ok();
     let database_url = std::env::var("DATABASE_URL")
@@ -29,12 +29,12 @@ fn main() -> Result<()> {
 
     // create properties
     let new_prop = NewProperties {
-        molecule_id: 0,
-        energy: None,
-        chemical_model: "test".into(),
+        model_id: 0,
+        molecule_id: 1,
+        energy: None
     };
 
-    diesel::insert_into(properties)
+    diesel::insert_into(molecule_properties)
         .values(&new_prop)
         .execute(&db_conn)?;
 
