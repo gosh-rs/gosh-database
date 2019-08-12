@@ -1,53 +1,45 @@
-// schema.rs
-// :PROPERTIES:
-// :header-args: :tangle src/schema.rs
-// :END:
-
-// [[file:~/Workspace/Programming/gosh-rs/database/database.note::*schema.rs][schema.rs:1]]
 table! {
-    molecules {
+    checkpoints (id) {
         id -> Integer,
-        name -> Nullable<Text>,
-        lattice -> Nullable<Blob>,
+        key -> Text,
+        data -> Binary,
+        ctime -> Timestamp,
+        mtime -> Timestamp,
     }
 }
 
 table! {
-    /// Chemical models for calculating molecular properties.
-    chemical_models {
+    models (id) {
         id -> Integer,
-        name -> Nullable<Text>,
+        name -> Text,
+        ctime -> Timestamp,
+        mtime -> Timestamp,
     }
 }
 
 table! {
-    /// Atoms related properties calculated using various models.
-    atom_properties(model_id, atom_id) {
-        model_id -> Integer,
-        atom_id -> Integer,
-        force -> Nullable<Blob>,
-        dipole -> Nullable<Blob>,
-    }
-}
-
-table! {
-    /// Atoms in molecule.
-    atoms {
+    molecules (id) {
         id -> Integer,
-        molecule_id -> Integer,
-        element -> Integer,
-        position -> Blob,
-        tag -> Nullable<Text>,
-        mass -> Nullable<Double>,
+        name -> Text,
+        data -> Binary,
+        ctime -> Timestamp,
+        mtime -> Timestamp,
     }
 }
 
 table! {
-    /// Molecular properties calculated using various models.
-    molecule_properties(model_id, molecule_id) {
+    properties (model_id, molecule_id) {
         model_id -> Integer,
         molecule_id -> Integer,
-        energy -> Nullable<Double>,
+        data -> Binary,
+        ctime -> Timestamp,
+        mtime -> Timestamp,
     }
 }
-// schema.rs:1 ends here
+
+allow_tables_to_appear_in_same_query!(
+    checkpoints,
+    models,
+    molecules,
+    properties,
+);

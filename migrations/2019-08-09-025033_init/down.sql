@@ -1,9 +1,7 @@
-DROP TABLE molecule_properties;
+DROP TABLE properties;
 
-DROP TABLE atom_properties;
-
-DROP TABLE chemical_models;
-
-DROP TABLE atoms;
+DROP TABLE models;
 
 DROP TABLE molecules;
+
+DROP TABLE checkpoints;

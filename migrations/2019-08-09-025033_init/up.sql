@@ -1,34 +1,32 @@
-CREATE TABLE molecule_properties (
+CREATE TABLE properties (
+       -- id INTEGER PRIMARY KEY NOT NULL,
        model_id INTEGER NOT NULL,
        molecule_id INTEGER NOT NULL,
-       energy DOUBLE,
+       data BLOB NOT NULL,
+       ctime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+       mtime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
        PRIMARY KEY (model_id, molecule_id)
 );
 
-CREATE TABLE atom_properties (
-       model_id INTEGER NOT NULL,
-       atom_id INTEGER NOT NULL,
-       force BLOB,
-       dipole BLOB,
-       PRIMARY KEY (model_id, atom_id)
-);
-
-CREATE TABLE chemical_models (
+CREATE TABLE models (
        id INTEGER PRIMARY KEY NOT NULL,
-       name TEXT NOT NULL
-);
-
-CREATE TABLE atoms (
-       id INTEGER PRIMARY KEY NOT NULL,
-       molecule_id INTEGER NOT NULL,
-       element INTEGER NOT NULL,
-       position BLOB NOT NULL,
-       tag TEXT,
-       mass DOUBLE
+       name TEXT NOT NULL,
+       ctime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+       mtime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE molecules (
        id INTEGER PRIMARY KEY NOT NULL,
-       name TEXT,
-       lattice BLOB
+       name TEXT NOT NULL,
+       data BLOB NOT NULL,
+       ctime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+       mtime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE checkpoints (
+       id INTEGER PRIMARY KEY NOT NULL,
+       key TEXT NOT NULL UNIQUE,
+       data BLOB NOT NULL,
+       ctime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+       mtime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

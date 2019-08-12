@@ -15,6 +15,8 @@ diesel_migrations = "1.0"
 dotenv = "0.10"
 serde = {version="1.0", features = ["derive"]}
 serde_json = "1.0"
+bincode = "1.0"
+gosh-models = {version = "*", path = "../models"}
 
 [dev-dependencies]
 # cargo:1 ends here
