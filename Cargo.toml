@@ -18,6 +18,7 @@ serde_json = "1.0"
 bincode = "1.0"
 gosh-models = {version = "*", path = "../models"}
 gchemol = {git = "https://github.com/ybyygu/gchemol.git", tag="v0.0.34"}
+#gchemol = {path = "/home/ybyygu/Workspace/Programming/gchemol-rs/gchemol/gchemol"}
 
 [dev-dependencies]
 # cargo:1 ends here
