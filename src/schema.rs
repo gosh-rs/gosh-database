@@ -9,6 +9,17 @@ table! {
 }
 
 table! {
+    kvstore (id) {
+        id -> Integer,
+        collection -> Text,
+        key -> Text,
+        data -> Binary,
+        ctime -> Timestamp,
+        mtime -> Timestamp,
+    }
+}
+
+table! {
     models (id) {
         id -> Integer,
         name -> Text,
@@ -39,6 +50,7 @@ table! {
 
 allow_tables_to_appear_in_same_query!(
     checkpoints,
+    kvstore,
     models,
     molecules,
     properties,

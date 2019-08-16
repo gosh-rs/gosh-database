@@ -17,10 +17,12 @@ use diesel::prelude::*;
 
 // [[file:~/Workspace/Programming/gosh-rs/database/database.note::*mods][mods:1]]
 mod checkpoint;
+mod collection;
 mod core;
 
 pub mod prelude {
     pub use crate::checkpoint::*;
+    pub use crate::collection::*;
 }
 
 pub(crate) mod schema;
@@ -35,6 +37,7 @@ pub(crate) mod common {
 
 // [[file:~/Workspace/Programming/gosh-rs/database/database.note::*base][base:1]]
 use crate::common::*;
+
 embed_migrations!();
 
 pub struct DbConnection {
