@@ -57,6 +57,18 @@ impl DbConnection {
         debug!("Database: {}", database_url);
 
         let conn = SqliteConnection::establish(&database_url)?;
+
+        // see: https://sqlite.org/faq.html#q19
+        //
+        // With synchronous OFF, SQLite continues without syncing as soon as
+        // it has handed data off to the operating system. If the application
+        // running SQLite crashes, the data will be safe, but the database might
+        // become corrupted if the operating system crashes or the computer
+        // loses power before that data has been written to the disk surface. On
+        // the other hand, commits can be orders of magnitude faster with
+        // synchronous OFF.
+        conn.execute("PRAGMA synchronous = OFF")?;
+
         let conn = Arc::new(Mutex::new(conn));
 
         let db = DbConnection {
