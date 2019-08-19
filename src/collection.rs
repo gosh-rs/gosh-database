@@ -4,7 +4,7 @@ use crate::*;
 
 pub trait Collection
 where
-    Self: Clone + serde::Serialize + serde::de::DeserializeOwned,
+    Self: serde::Serialize + serde::de::DeserializeOwned,
 {
     /// Return an unique name as the container for your data.
     fn collection_name() -> String;
@@ -75,6 +75,27 @@ where
     fn remove_collection(db: &DbConnection) -> Result<()> {
         Ok(())
     }
+
+    /// List all items in the collection.
+    fn list_collection(db: &DbConnection) -> Result<Vec<Self>> {
+        use crate::schema::kvstore::dsl::*;
+
+        let conn = db.get();
+        let cname = &Self::collection_name();
+        let list: Vec<(String, Vec<u8>)> = kvstore
+            .filter(collection.eq(&cname))
+            .select((key, data))
+            .load(&*conn)?;
+
+        let mut items = vec![];
+        for (obj_key, encoded) in list {
+            let x = bincode::deserialize(&encoded).with_context(|_| {
+                format!("Failed to deserialize data for {}/{}", cname, obj_key)
+            })?;
+            items.push(x);
+        }
+        Ok(items)
+    }
 }
 
 #[cfg(test)]
@@ -95,9 +116,14 @@ mod test {
 
     #[test]
     fn test_collection() -> Result<()> {
+        // setup db in a temp directory
+        let tdir = tempfile::tempdir()?;
+        let tmpdb = tdir.path().join("test.sqlite");
+        std::env::set_var("GOSH_DATABASE_URL", tmpdb);
+        let db = DbConnection::establish().unwrap();
+
         let x = TestObject { data: -12.0 };
 
-        let db = DbConnection::establish().unwrap();
         x.put_into_collection(&db, "test1")?;
 
         TestObject::get_from_collection(&db, "test1")?;
@@ -105,6 +131,14 @@ mod test {
         TestObject::del_from_collection(&db, "test1")?;
 
         TestObject::remove_collection(&db)?;
+
+        let x = TestObject::list_collection(&db)?;
+        assert!(x.is_empty());
+
+        let x = TestObject { data: 12.0 };
+        x.put_into_collection(&db, "test1")?;
+        let x = TestObject::list_collection(&db)?;
+        assert_eq!(1, x.len());
 
         Ok(())
     }
