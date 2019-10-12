@@ -73,6 +73,11 @@ where
 
     /// Remove all objects in this collection.
     fn remove_collection(db: &DbConnection) -> Result<()> {
+        use crate::schema::kvstore::dsl::*;
+
+        let conn = db.get();
+        let cname = &Self::collection_name();
+        diesel::delete(kvstore.filter(collection.eq(&cname))).execute(&*conn)?;
         Ok(())
     }
 
@@ -95,6 +100,23 @@ where
             items.push(x);
         }
         Ok(items)
+    }
+
+    /// Return the number of items in collection.
+    fn collection_size(db: &DbConnection) -> Result<i64> {
+        use crate::schema::kvstore::dsl::*;
+
+        let conn = db.get();
+        let cname = &Self::collection_name();
+        let count = kvstore
+            .filter(collection.eq(&cname))
+            .count()
+            .get_result(&*conn)?;
+
+        // conn.execute(&format!("DROP TABLE {}", "kvstore")).unwrap();
+        // conn.execute("SELECT COUNT(*) FROM kvstore").unwrap();
+
+        Ok(count)
     }
 }
 
