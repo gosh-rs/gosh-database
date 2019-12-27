@@ -1,6 +1,7 @@
-use crate::common::*;
 use crate::schema::*;
 use crate::*;
+
+use guts::prelude::*;
 
 pub trait Collection
 where

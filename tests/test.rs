@@ -6,9 +6,7 @@
 // [[file:~/Workspace/Programming/gosh-rs/database/database.note::*tests][tests:1]]
 use gosh_db::prelude::*;
 use gosh_db::DbConnection;
-use quicli::prelude::*;
-
-type Result<T> = ::std::result::Result<T, Error>;
+use guts::prelude::*;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct Test {

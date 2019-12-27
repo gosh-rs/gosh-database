@@ -1,10 +1,7 @@
-// core.rs
-// :PROPERTIES:
-// :header-args: :tangle src/core.rs
-// :END:
+// pub
 
-// [[file:~/Workspace/Programming/gosh-rs/database/database.note::*core.rs][core.rs:1]]
-use crate::common::*;
+// [[file:~/Workspace/Programming/gosh-rs/database/database.note::*pub][pub:1]]
+use guts::prelude::*;
 use crate::schema::*;
 use crate::*;
 
@@ -89,4 +86,4 @@ pub fn save_model_results(mp: &ModelProperties, db: &DbConnection) -> Result<()>
 
     Ok(())
 }
-// core.rs:1 ends here
+// pub:1 ends here

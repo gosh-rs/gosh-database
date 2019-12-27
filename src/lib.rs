@@ -26,17 +26,12 @@ pub mod prelude {
 }
 
 pub(crate) mod schema;
-
-pub(crate) mod common {
-    pub use quicli::prelude::*;
-    pub type Result<T> = ::std::result::Result<T, Error>;
-}
 // mods:1 ends here
 
 // base
 
 // [[file:~/Workspace/Programming/gosh-rs/database/database.note::*base][base:1]]
-use crate::common::*;
+use guts::prelude::*;
 
 embed_migrations!();
 

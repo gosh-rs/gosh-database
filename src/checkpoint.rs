@@ -1,6 +1,7 @@
-use crate::common::*;
 use crate::schema::*;
 use crate::*;
+
+use guts::prelude::*;
 
 pub trait Checkpoint
 where
@@ -92,12 +93,14 @@ where
     }
 }
 
+#[cfg(feature = "adhoc")]
 impl Checkpoint for gosh_models::ModelProperties {
     fn checkpoint_key(&self) -> String {
         "DEFAULT-MP-CKPT".into()
     }
 }
 
+#[cfg(feature = "adhoc")]
 impl Checkpoint for gchemol::Molecule {
     fn checkpoint_key(&self) -> String {
         format!("CKPT-MOLE-{}", self.title())
@@ -126,7 +129,6 @@ mod test {
         let tdir = tempfile::tempdir()?;
         let tmpdb = tdir.path().join("test.sqlite");
         let url = format!("{}", tmpdb.display());
-        // accept &str, not Path
         let db = DbConnection::connect(&url)?;
 
         // commit checkpoint

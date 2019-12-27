@@ -8,20 +8,23 @@ edition = "2018"
 authors = ["Wenping Guo <ybyygu@gmail.com>"]
 
 [dependencies]
-structopt = "0.2"
-quicli = "0.4"
 diesel = { version = "1.4", features = ["sqlite"] }
 diesel_migrations = "1.0"
 # Important for statically linking SQLite3
 libsqlite3-sys = { version = "*", features = ["bundled"] }
 dotenv = "0.10"
-serde = {version="1.0", features = ["derive"]}
-serde_json = "1.0"
+serde = {version="1", features = ["derive"]}
+serde_json = "1"
 bincode = "1.0"
-gosh-models = {version = "*", path = "../models"}
+gosh-models = {path = "../models"}
+guts = { git = "https://github.com/ybyygu/guts.git" }
 gchemol = {git = "https://github.com/ybyygu/gchemol.git"}
 #gchemol = {path = "/home/ybyygu/Workspace/Programming/gchemol-rs/gchemol/gchemol"}
 
 [dev-dependencies]
 tempfile = "3"
+
+[features]
+# for adhoc hacking
+adhoc = []
 # cargo:1 ends here
