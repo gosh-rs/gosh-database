@@ -56,7 +56,13 @@ impl DbConnection {
             .with_context(|e| format!("GOSH_DATABASE_URL var not set: {}", e))?;
         debug!("Database: {}", database_url);
 
-        let conn = SqliteConnection::establish(&database_url)?;
+        Self::connect(&database_url)
+    }
+
+    /// Connect to database specified using `database_url`.
+    pub fn connect(database_url: &str) -> Result<DbConnection> {
+        // diesel accept &str, not Path
+        let conn = SqliteConnection::establish(database_url)?;
 
         // see: https://sqlite.org/faq.html#q19
         //

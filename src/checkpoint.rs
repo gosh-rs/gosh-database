@@ -41,17 +41,16 @@ where
     }
 
     /// Return the number of available checkpoints in database.
-    fn get_number_of_checkpoints(&self, db: &DbConnection) -> Result<usize> {
+    fn get_number_of_checkpoints(&self, db: &DbConnection) -> Result<i64> {
         use crate::schema::checkpoints::dsl::*;
 
         let conn = db.get();
         let ckpt_key = self.checkpoint_key();
-        let ckpts: Vec<i32> = checkpoints
+        let count = checkpoints
             .filter(key.eq(&ckpt_key))
-            .select(id)
-            .order(ctime.asc())
-            .load(&*conn)?;
-        Ok(ckpts.len())
+            .count()
+            .get_result(&*conn)?;
+        Ok(count)
     }
 
     /// Restore state from the specified checkpoint `n` (ordered by create
@@ -126,9 +125,9 @@ mod test {
         // setup database in a temp directory
         let tdir = tempfile::tempdir()?;
         let tmpdb = tdir.path().join("test.sqlite");
-        dbg!(&tmpdb);
-        std::env::set_var("GOSH_DATABASE_URL", tmpdb);
-        let db = DbConnection::establish().unwrap();
+        let url = format!("{}", tmpdb.display());
+        // accept &str, not Path
+        let db = DbConnection::connect(&url)?;
 
         // commit checkpoint
         let mut x = TestObject { data: -12.0 };
