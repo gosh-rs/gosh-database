@@ -37,12 +37,26 @@ where
 
     /// Restore state from the latest checkpoint.
     fn restore_from_latest(&mut self, db: &DbConnection) -> Result<()> {
-        self.restart_from_checkpoint(db, -1)
+        self.restore_from_checkpoint(db, -1)
+    }
+
+    /// Return the number of available checkpoints in database.
+    fn get_number_of_checkpoints(&self, db: &DbConnection) -> Result<usize> {
+        use crate::schema::checkpoints::dsl::*;
+
+        let conn = db.get();
+        let ckpt_key = self.checkpoint_key();
+        let ckpts: Vec<i32> = checkpoints
+            .filter(key.eq(&ckpt_key))
+            .select(id)
+            .order(ctime.asc())
+            .load(&*conn)?;
+        Ok(ckpts.len())
     }
 
     /// Restore state from the specified checkpoint `n` (ordered by create
     /// time).
-    fn restart_from_checkpoint(&mut self, db: &DbConnection, n: i32) -> Result<()> {
+    fn restore_from_checkpoint(&mut self, db: &DbConnection, n: i32) -> Result<()> {
         use crate::schema::checkpoints::dsl::*;
 
         let conn = db.get();
@@ -88,5 +102,54 @@ impl Checkpoint for gosh_models::ModelProperties {
 impl Checkpoint for gchemol::Molecule {
     fn checkpoint_key(&self) -> String {
         format!("CKPT-MOLE-{}", self.title())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[derive(Clone, Debug, Serialize, Deserialize)]
+    struct TestObject {
+        data: f64,
+    }
+
+    impl Checkpoint for TestObject {
+        /// Return an unique name as the container for your data.
+        fn checkpoint_key(&self) -> String {
+            "test-obj-chk".into()
+        }
+    }
+
+    #[test]
+    fn test_checkpoint() -> Result<()> {
+        // setup database in a temp directory
+        let tdir = tempfile::tempdir()?;
+        let tmpdb = tdir.path().join("test.sqlite");
+        dbg!(&tmpdb);
+        std::env::set_var("GOSH_DATABASE_URL", tmpdb);
+        let db = DbConnection::establish().unwrap();
+
+        // commit checkpoint
+        let mut x = TestObject { data: -12.0 };
+        x.checkpoint(&db)?;
+        // commit a new checkpoint
+        x.data = 1.0;
+        x.checkpoint(&db)?;
+        // commit a new checkpoint again
+        x.data = 0.0;
+        x.checkpoint(&db)?;
+        assert_eq!(x.data, 0.0);
+
+        // restore from checkpoint
+        assert_eq!(x.get_number_of_checkpoints(&db)?, 3);
+        x.restore_from_latest(&db)?;
+        assert_eq!(x.data, 0.0);
+        x.restore_from_checkpoint(&db, 0)?;
+        assert_eq!(x.data, -12.0);
+        x.restore_from_checkpoint(&db, 1)?;
+        assert_eq!(x.data, 1.0);
+
+        Ok(())
     }
 }

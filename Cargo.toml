@@ -3,7 +3,7 @@
 # [[file:~/Workspace/Programming/gosh-rs/database/database.note::*cargo][cargo:1]]
 [package]
 name = "gosh-db"
-version = "0.0.3"
+version = "0.0.4"
 edition = "2018"
 authors = ["Wenping Guo <ybyygu@gmail.com>"]
 
@@ -19,7 +19,7 @@ serde = {version="1.0", features = ["derive"]}
 serde_json = "1.0"
 bincode = "1.0"
 gosh-models = {version = "*", path = "../models"}
-gchemol = {git = "https://github.com/ybyygu/gchemol.git", tag="v0.0.35"}
+gchemol = {git = "https://github.com/ybyygu/gchemol.git"}
 #gchemol = {path = "/home/ybyygu/Workspace/Programming/gchemol-rs/gchemol/gchemol"}
 
 [dev-dependencies]
