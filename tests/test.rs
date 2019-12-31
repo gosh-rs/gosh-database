@@ -39,11 +39,11 @@ fn test_checkpoint_and_collection() -> Result<()> {
     // save into collection
     x.put_into_collection(&db, "test1")?;
     // commit a checkpoint
-    x.checkpoint(&db)?;
+    x.commit_checkpoint(&db)?;
 
     let mut x = Test { data: 12.0 };
     // restore data from checkpoint
-    x.restore_from_latest(&db)?;
+    x.restore_from_checkpoint(&db)?;
     assert_eq!(x.data, -12.0);
 
     Ok(())

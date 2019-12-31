@@ -11,7 +11,7 @@ where
     fn checkpoint_key(&self) -> String;
 
     /// Set a checkpoint
-    fn checkpoint(&self, db: &DbConnection) -> Result<()> {
+    fn commit_checkpoint(&self, db: &DbConnection) -> Result<()> {
         use crate::schema::checkpoints::dsl::*;
 
         let ckpt_key = &self.checkpoint_key();
@@ -37,8 +37,8 @@ where
     }
 
     /// Restore state from the latest checkpoint.
-    fn restore_from_latest(&mut self, db: &DbConnection) -> Result<()> {
-        self.restore_from_checkpoint(db, -1)
+    fn restore_from_checkpoint(&mut self, db: &DbConnection) -> Result<()> {
+        self.restore_from_checkpoint_n(db, -1)
     }
 
     /// Return the number of available checkpoints in database.
@@ -56,7 +56,7 @@ where
 
     /// Restore state from the specified checkpoint `n` (ordered by create
     /// time).
-    fn restore_from_checkpoint(&mut self, db: &DbConnection, n: i32) -> Result<()> {
+    fn restore_from_checkpoint_n(&mut self, db: &DbConnection, n: i32) -> Result<()> {
         use crate::schema::checkpoints::dsl::*;
 
         let conn = db.get();
@@ -133,22 +133,22 @@ mod test {
 
         // commit checkpoint
         let mut x = TestObject { data: -12.0 };
-        x.checkpoint(&db)?;
+        x.commit_checkpoint(&db)?;
         // commit a new checkpoint
         x.data = 1.0;
-        x.checkpoint(&db)?;
+        x.commit_checkpoint(&db)?;
         // commit a new checkpoint again
         x.data = 0.0;
-        x.checkpoint(&db)?;
+        x.commit_checkpoint(&db)?;
         assert_eq!(x.data, 0.0);
 
         // restore from checkpoint
         assert_eq!(x.get_number_of_checkpoints(&db)?, 3);
-        x.restore_from_latest(&db)?;
+        x.restore_from_checkpoint(&db)?;
         assert_eq!(x.data, 0.0);
-        x.restore_from_checkpoint(&db, 0)?;
+        x.restore_from_checkpoint_n(&db, 0)?;
         assert_eq!(x.data, -12.0);
-        x.restore_from_checkpoint(&db, 1)?;
+        x.restore_from_checkpoint_n(&db, 1)?;
         assert_eq!(x.data, 1.0);
 
         Ok(())
