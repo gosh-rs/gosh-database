@@ -42,6 +42,7 @@ where
     }
 
     /// Return the number of available checkpoints in database.
+    #[cfg(feature="adhoc")]
     fn get_number_of_checkpoints(&self, db: &DbConnection) -> Result<i64> {
         use crate::schema::checkpoints::dsl::*;
 

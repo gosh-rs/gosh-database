@@ -35,6 +35,7 @@ use guts::prelude::*;
 
 embed_migrations!();
 
+#[derive(Clone)]
 pub struct DbConnection {
     database_url: String,
     connection: Arc<Mutex<SqliteConnection>>,
