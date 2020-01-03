@@ -18,7 +18,7 @@ serde_json = "1"
 bincode = "1.0"
 gosh-models = {path = "../models"}
 guts = { git = "https://github.com/ybyygu/guts.git" }
-gchemol = {git = "https://github.com/ybyygu/gchemol.git"}
+gchemol = {git = "https://github.com/ybyygu/gchemol.git", branch="dev"}
 #gchemol = {path = "/home/ybyygu/Workspace/Programming/gchemol-rs/gchemol/gchemol"}
 
 [dev-dependencies]
