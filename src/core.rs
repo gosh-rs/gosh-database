@@ -1,6 +1,8 @@
 // pub
 
 // [[file:~/Workspace/Programming/gosh-rs/database/database.note::*pub][pub:1]]
+use gosh_core::*;
+
 use crate::schema::*;
 use crate::*;
 use guts::prelude::*;
@@ -54,7 +56,9 @@ pub struct Properties {
 // }
 
 pub fn save_model_results(mp: &ModelProperties, db: &DbConnection) -> Result<()> {
-    let mol = mp.get_molecule().expect("model properties has no structure!");
+    let mol = mp
+        .get_molecule()
+        .expect("model properties has no structure!");
 
     // save molecule record
     let conn = db.get();

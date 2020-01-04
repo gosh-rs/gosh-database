@@ -1,3 +1,5 @@
+use gosh_core::*;
+
 use crate::schema::*;
 use crate::*;
 

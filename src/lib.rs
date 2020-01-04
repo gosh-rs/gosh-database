@@ -31,6 +31,8 @@ pub(crate) mod schema;
 // base
 
 // [[file:~/Workspace/Programming/gosh-rs/database/database.note::*base][base:1]]
+use gosh_core::*;
+
 use guts::prelude::*;
 
 embed_migrations!();

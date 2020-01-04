@@ -4,8 +4,10 @@
 // :END:
 
 // [[file:~/Workspace/Programming/gosh-rs/database/database.note::*tests][tests:1]]
+use gosh_core::*;
 use gosh_db::prelude::*;
 use gosh_db::DbConnection;
+
 use guts::prelude::*;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
