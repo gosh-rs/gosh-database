@@ -146,6 +146,7 @@ mod test {
         assert_eq!(x.data, 0.0);
 
         // restore from checkpoint
+        #[cfg(feature="adhoc")]
         assert_eq!(x.get_number_of_checkpoints(&db)?, 3);
         x.restore_from_checkpoint(&db)?;
         assert_eq!(x.data, 0.0);
