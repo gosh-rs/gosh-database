@@ -6,6 +6,10 @@ name = "gosh-database"
 version = "0.0.6"
 edition = "2018"
 authors = ["Wenping Guo <ybyygu@gmail.com>"]
+description = "database for gosh"
+homepage = "https://github.com/gosh-rs/gosh-database"
+repository = "https://github.com/gosh-rs/gosh-database"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 diesel = { version = "1", features = ["sqlite"] }
@@ -16,8 +20,8 @@ dotenv = "0.10"
 serde = {version="1", features = ["derive"]}
 serde_json = "1"
 bincode = "1"
-gosh-core = { version="0.0.1", path="../core" }
-gosh-model = { version="0.0.8", path="../models"}
+gosh-core = { version="0.0.1" }
+gosh-model = { version="0.0.8" }
 
 [dev-dependencies]
 tempfile = "3"
