@@ -5,7 +5,7 @@ use gosh_core::*;
 
 use crate::schema::*;
 use crate::*;
-use guts::prelude::*;
+use gut::prelude::*;
 
 use gosh_models::ModelProperties;
 

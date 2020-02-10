@@ -8,7 +8,7 @@ use gosh_core::*;
 use gosh_db::prelude::*;
 use gosh_db::DbConnection;
 
-use guts::prelude::*;
+use gut::prelude::*;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct Test {

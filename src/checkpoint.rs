@@ -3,7 +3,7 @@ use gosh_core::*;
 use crate::schema::*;
 use crate::*;
 
-use guts::prelude::*;
+use gut::prelude::*;
 
 pub trait Checkpoint
 where
@@ -27,7 +27,7 @@ where
         diesel::insert_into(checkpoints)
             .values(&row)
             .execute(&*conn)
-            .with_context(|_| {
+            .with_context(|| {
                 format!(
                     "Failed to save checkpoint\n chk key: {}\n db source: {}",
                     ckpt_key,
@@ -85,7 +85,7 @@ where
             .select(data)
             .first(&*conn)?;
 
-        let x = bincode::deserialize(&encoded).with_context(|_| {
+        let x = bincode::deserialize(&encoded).with_context(|| {
             format!(
                 "Failed to deserialize from data for checkpoint: {}/{}",
                 ckpt_key, n

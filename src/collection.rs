@@ -1,7 +1,7 @@
 use crate::schema::*;
 use crate::*;
 
-use guts::prelude::*;
+use gut::prelude::*;
 
 pub trait Collection
 where
@@ -26,7 +26,7 @@ where
         diesel::insert_into(kvstore)
             .values(&row)
             .execute(&*conn)
-            .with_context(|_| {
+            .with_context(|| {
                 format!(
                     "Failed to put data into collection {} with key {}\n db source: {}",
                     cname,
@@ -51,7 +51,7 @@ where
             .first(&*conn)?;
 
         let x = bincode::deserialize(&encoded)
-            .with_context(|_| format!("Failed to deserialize data for {}/{}", cname, obj_key))?;
+            .with_context(|| format!("Failed to deserialize data for {}/{}", cname, obj_key))?;
 
         Ok(x)
     }
@@ -95,7 +95,7 @@ where
 
         let mut items = vec![];
         for (obj_key, encoded) in list {
-            let x = bincode::deserialize(&encoded).with_context(|_| {
+            let x = bincode::deserialize(&encoded).with_context(|| {
                 format!("Failed to deserialize data for {}/{}", cname, obj_key)
             })?;
             items.push(x);

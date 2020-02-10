@@ -33,7 +33,7 @@ pub(crate) mod schema;
 // [[file:~/Workspace/Programming/gosh-rs/database/database.note::*base][base:1]]
 use gosh_core::*;
 
-use guts::prelude::*;
+use gut::prelude::*;
 
 embed_migrations!();
 
@@ -51,7 +51,7 @@ impl DbConnection {
         dotenv::dotenv().ok();
 
         let database_url = std::env::var("GOSH_DATABASE_URL")
-            .with_context(|e| format!("GOSH_DATABASE_URL var not set: {}", e))?;
+            .with_context(|| format!("GOSH_DATABASE_URL var not set"))?;
         debug!("Database: {}", database_url);
 
         Self::connect(&database_url)
