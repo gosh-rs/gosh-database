@@ -97,7 +97,7 @@ where
 }
 
 #[cfg(feature = "adhoc")]
-impl Checkpoint for gosh_models::ModelProperties {
+impl Checkpoint for gosh_model::ModelProperties {
     fn checkpoint_key(&self) -> String {
         "DEFAULT-MP-CKPT".into()
     }

@@ -7,7 +7,7 @@ use crate::schema::*;
 use crate::*;
 use gut::prelude::*;
 
-use gosh_models::ModelProperties;
+use gosh_model::ModelProperties;
 
 #[derive(Identifiable, Queryable, Associations, PartialEq, Debug)]
 #[table_name = "models"]
