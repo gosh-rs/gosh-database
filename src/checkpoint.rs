@@ -19,10 +19,7 @@ where
         let ckpt_key = &self.checkpoint_key();
         let conn = db.get();
 
-        let row = (
-            key.eq(ckpt_key),
-            data.eq({ bincode::serialize(&self).unwrap() }),
-        );
+        let row = (key.eq(ckpt_key), data.eq({ bincode::serialize(&self).unwrap() }));
 
         diesel::insert_into(checkpoints)
             .values(&row)
@@ -43,17 +40,37 @@ where
         self.restore_from_checkpoint_n(db, -1)
     }
 
+    /// List available checkpoints in `db`.
+    #[cfg(feature = "adhoc")]
+    fn list_checkpoints(&self, db: &DbConnection) -> Result<()> {
+        use crate::schema::checkpoints::dsl::*;
+
+        let conn = db.get();
+        let ckpt_key = self.checkpoint_key();
+        let ckpts: Vec<(i32, String, String)> = checkpoints
+            .filter(key.eq(&ckpt_key))
+            .select((id, key, ctime))
+            .order(ctime.asc())
+            .load(&*conn)?;
+        let nckpts = ckpts.len();
+        info!("Found {} checkpoints with key {}", nckpts, &ckpt_key);
+
+        println!("{:^5}\t{:^}", "slot", "create time");
+        for (i, (_, _, t)) in ckpts.iter().enumerate() {
+            println!("{:^5}\t{:^}", i, t);
+        }
+
+        Ok(())
+    }
+
     /// Return the number of available checkpoints in database.
-    #[cfg(feature="adhoc")]
+    #[cfg(feature = "adhoc")]
     fn get_number_of_checkpoints(&self, db: &DbConnection) -> Result<i64> {
         use crate::schema::checkpoints::dsl::*;
 
         let conn = db.get();
         let ckpt_key = self.checkpoint_key();
-        let count = checkpoints
-            .filter(key.eq(&ckpt_key))
-            .count()
-            .get_result(&*conn)?;
+        let count = checkpoints.filter(key.eq(&ckpt_key)).count().get_result(&*conn)?;
         Ok(count)
     }
 
@@ -80,17 +97,10 @@ where
         }
 
         // Get encoded data.
-        let encoded: Vec<u8> = checkpoints
-            .filter(id.eq(&ckpts[k]))
-            .select(data)
-            .first(&*conn)?;
+        let encoded: Vec<u8> = checkpoints.filter(id.eq(&ckpts[k])).select(data).first(&*conn)?;
 
-        let x = bincode::deserialize(&encoded).with_context(|| {
-            format!(
-                "Failed to deserialize from data for checkpoint: {}/{}",
-                ckpt_key, n
-            )
-        })?;
+        let x = bincode::deserialize(&encoded)
+            .with_context(|| format!("Failed to deserialize from data for checkpoint: {}/{}", ckpt_key, n))?;
         self.clone_from(&x);
         Ok(())
     }
