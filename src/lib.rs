@@ -1,21 +1,19 @@
-// imports
-
-// [[file:~/Workspace/Programming/gosh-rs/database/database.note::*imports][imports:1]]
+// [[file:../database.note::*imports][imports:1]]
 #[macro_use]
 extern crate diesel;
 #[macro_use]
 extern crate serde;
 #[macro_use]
 extern crate diesel_migrations;
+#[macro_use]
+extern crate derivative;
 
 use std::sync::{Arc, Mutex, MutexGuard};
 
 use diesel::prelude::*;
 // imports:1 ends here
 
-// mods
-
-// [[file:~/Workspace/Programming/gosh-rs/database/database.note::*mods][mods:1]]
+// [[file:../database.note::*mods][mods:1]]
 mod checkpoint;
 mod collection;
 mod core;
@@ -28,18 +26,18 @@ pub mod prelude {
 pub(crate) mod schema;
 // mods:1 ends here
 
-// base
-
-// [[file:~/Workspace/Programming/gosh-rs/database/database.note::*base][base:1]]
+// [[file:../database.note::*base][base:1]]
 use gosh_core::*;
 
 use gut::prelude::*;
 
 embed_migrations!();
 
-#[derive(Clone)]
+#[derive(Clone, Derivative)]
+#[derivative(Debug)]
 pub struct DbConnection {
     database_url: String,
+    #[derivative(Debug="ignore")]
     connection: Arc<Mutex<SqliteConnection>>,
 }
 

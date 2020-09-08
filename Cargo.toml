@@ -1,6 +1,4 @@
-# cargo
-
-# [[file:~/Workspace/Programming/gosh-rs/database/database.note::*cargo][cargo:1]]
+# [[file:database.note::*cargo][cargo:1]]
 [package]
 name = "gosh-database"
 version = "0.0.8"
@@ -12,6 +10,7 @@ repository = "https://github.com/gosh-rs/gosh-database"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
+derivative = "2.1.1"
 diesel = { version = "1", features = ["sqlite"] }
 diesel_migrations = "1"
 # Important for statically linking SQLite3
