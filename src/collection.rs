@@ -8,7 +8,9 @@ where
     Self: serde::Serialize + serde::de::DeserializeOwned,
 {
     /// Return an unique name as the container for your data.
-    fn collection_name() -> String;
+    fn collection_name() -> String {
+        format!("{}.ckpt", std::any::type_name::<Self>())
+    }
 
     /// Put self into collection.
     fn put_into_collection(&self, db: &DbConnection, new_key: &str) -> Result<()> {
@@ -62,12 +64,7 @@ where
 
         let conn = db.get();
         let cname = &Self::collection_name();
-        diesel::delete(
-            kvstore
-                .filter(collection.eq(&cname))
-                .filter(key.eq(&obj_key)),
-        )
-        .execute(&*conn)?;
+        diesel::delete(kvstore.filter(collection.eq(&cname)).filter(key.eq(&obj_key))).execute(&*conn)?;
 
         Ok(())
     }
@@ -88,16 +85,12 @@ where
 
         let conn = db.get();
         let cname = &Self::collection_name();
-        let list: Vec<(String, Vec<u8>)> = kvstore
-            .filter(collection.eq(&cname))
-            .select((key, data))
-            .load(&*conn)?;
+        let list: Vec<(String, Vec<u8>)> = kvstore.filter(collection.eq(&cname)).select((key, data)).load(&*conn)?;
 
         let mut items = vec![];
         for (obj_key, encoded) in list {
-            let x = bincode::deserialize(&encoded).with_context(|| {
-                format!("Failed to deserialize data for {}/{}", cname, obj_key)
-            })?;
+            let x = bincode::deserialize(&encoded)
+                .with_context(|| format!("Failed to deserialize data for {}/{}", cname, obj_key))?;
             items.push(x);
         }
         Ok(items)
@@ -109,10 +102,7 @@ where
 
         let conn = db.get();
         let cname = &Self::collection_name();
-        let count = kvstore
-            .filter(collection.eq(&cname))
-            .count()
-            .get_result(&*conn)?;
+        let count = kvstore.filter(collection.eq(&cname)).count().get_result(&*conn)?;
 
         // conn.execute(&format!("DROP TABLE {}", "kvstore")).unwrap();
         // conn.execute("SELECT COUNT(*) FROM kvstore").unwrap();
@@ -121,48 +111,12 @@ where
     }
 }
 
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[derive(Clone, Debug, Serialize, Deserialize)]
-    struct TestObject {
-        data: f64,
-    }
-
-    impl Collection for TestObject {
-        /// Return an unique name as the container for your data.
-        fn collection_name() -> String {
-            "t-obj-tmp".into()
-        }
-    }
-
-    #[test]
-    fn test_collection() -> Result<()> {
-        // setup db in a temp directory
-        let tdir = tempfile::tempdir()?;
-        let tmpdb = tdir.path().join("test.sqlite");
-        let url = format!("{}", tmpdb.display());
-        let db = DbConnection::connect(&url)?;
-
-        let x = TestObject { data: -12.0 };
-
-        x.put_into_collection(&db, "test1")?;
-
-        TestObject::get_from_collection(&db, "test1")?;
-
-        TestObject::del_from_collection(&db, "test1")?;
-
-        TestObject::remove_collection(&db)?;
-
-        let x = TestObject::list_collection(&db)?;
-        assert!(x.is_empty());
-
-        let x = TestObject { data: 12.0 };
-        x.put_into_collection(&db, "test1")?;
-        let x = TestObject::list_collection(&db)?;
-        assert_eq!(1, x.len());
-
-        Ok(())
-    }
+impl<T> Collection for T
+where
+    T: serde::Serialize + serde::de::DeserializeOwned,
+{
+    // /// Return an unique name as the container for your data.
+    // fn collection_name() -> String {
+    //     format!("ckpt-{}", std::any::type_name::<Self>())
+    // }
 }

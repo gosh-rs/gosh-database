@@ -9,17 +9,51 @@ pub trait Checkpoint
 where
     Self: Clone + serde::Serialize + serde::de::DeserializeOwned,
 {
-    /// Return a key associated with a group of checkpoints.
-    fn checkpoint_key(&self) -> String;
+    // Return a key associated with a group of checkpoints.
+    // const CKPT_KEY: &'static str;
+
+    /// Return an unique name as the container for your data.
+    fn checkpoint_name() -> String {
+        format!("{}.ckpt", std::any::type_name::<Self>())
+    }
+
+    /// Load from the specified checkpoint `n` (ordered by create time).
+    fn from_checkpoint_n(db: &DbConnection, n: i32) -> Result<Self> {
+        use crate::schema::checkpoints::dsl::*;
+
+        let conn = db.get();
+        let ckpt_key = Self::checkpoint_name();
+        let ckpts: Vec<i32> = checkpoints
+            .filter(key.eq(&ckpt_key))
+            .select(id)
+            .order(ctime.asc())
+            .load(&*conn)?;
+        let nckpts = ckpts.len();
+        info!("Found {} checkpoints with key {}", nckpts, &ckpt_key);
+
+        // Allow negative index into the list.
+        let k = if n < 0 { nckpts as i32 + n } else { n } as usize;
+        // Avoid panic when n is invalid.
+        if k >= nckpts {
+            bail!("specified checkpoint {} is out of range.", n);
+        }
+
+        // Get encoded data.
+        let encoded: Vec<u8> = checkpoints.filter(id.eq(&ckpts[k])).select(data).first(&*conn)?;
+
+        let x = bincode::deserialize(&encoded)
+            .with_context(|| format!("Failed to deserialize from data for checkpoint: {}/{}", ckpt_key, n))?;
+        Ok(x)
+    }
 
     /// Set a checkpoint
     fn commit_checkpoint(&self, db: &DbConnection) -> Result<()> {
         use crate::schema::checkpoints::dsl::*;
 
-        let ckpt_key = &self.checkpoint_key();
+        let ckpt_key = Self::checkpoint_name();
         let conn = db.get();
 
-        let row = (key.eq(ckpt_key), data.eq({ bincode::serialize(&self).unwrap() }));
+        let row = (key.eq(&ckpt_key), data.eq({ bincode::serialize(&self).unwrap() }));
 
         diesel::insert_into(checkpoints)
             .values(&row)
@@ -42,11 +76,11 @@ where
 
     /// List available checkpoints in `db`.
     #[cfg(feature = "adhoc")]
-    fn list_checkpoints(&self, db: &DbConnection) -> Result<()> {
+    fn list_checkpoints(db: &DbConnection) -> Result<()> {
         use crate::schema::checkpoints::dsl::*;
 
         let conn = db.get();
-        let ckpt_key = self.checkpoint_key();
+        let ckpt_key = Self::checkpoint_name();
         let ckpts: Vec<(i32, String, String)> = checkpoints
             .filter(key.eq(&ckpt_key))
             .select((id, key, ctime))
@@ -69,7 +103,7 @@ where
         use crate::schema::checkpoints::dsl::*;
 
         let conn = db.get();
-        let ckpt_key = self.checkpoint_key();
+        let ckpt_key = Self::checkpoint_name();
         let count = checkpoints.filter(key.eq(&ckpt_key)).count().get_result(&*conn)?;
         Ok(count)
     }
@@ -77,48 +111,23 @@ where
     /// Restore state from the specified checkpoint `n` (ordered by create
     /// time).
     fn restore_from_checkpoint_n(&mut self, db: &DbConnection, n: i32) -> Result<()> {
-        use crate::schema::checkpoints::dsl::*;
-
-        let conn = db.get();
-        let ckpt_key = self.checkpoint_key();
-        let ckpts: Vec<i32> = checkpoints
-            .filter(key.eq(&ckpt_key))
-            .select(id)
-            .order(ctime.asc())
-            .load(&*conn)?;
-        let nckpts = ckpts.len();
-        info!("Found {} checkpoints with key {}", nckpts, &ckpt_key);
-
-        // Allow negative index into the list.
-        let k = if n < 0 { nckpts as i32 + n } else { n } as usize;
-        // Avoid panic when n is invalid.
-        if k >= nckpts {
-            bail!("specified checkpoint {} is out of range.", n);
-        }
-
-        // Get encoded data.
-        let encoded: Vec<u8> = checkpoints.filter(id.eq(&ckpts[k])).select(data).first(&*conn)?;
-
-        let x = bincode::deserialize(&encoded)
-            .with_context(|| format!("Failed to deserialize from data for checkpoint: {}/{}", ckpt_key, n))?;
+        let x = Self::from_checkpoint_n(db, n)?;
         self.clone_from(&x);
         Ok(())
     }
 }
 
-#[cfg(feature = "adhoc")]
-impl Checkpoint for gosh_model::ModelProperties {
-    fn checkpoint_key(&self) -> String {
-        "DEFAULT-MP-CKPT".into()
-    }
-}
+// #[cfg(feature = "adhoc")]
+// impl Checkpoint for gosh_model::ModelProperties {
+//     const CKPT_KEY: &'static str = "DEFAULT-MP-CKPT";
+// }
 
-#[cfg(feature = "adhoc")]
-impl Checkpoint for gchemol::Molecule {
-    fn checkpoint_key(&self) -> String {
-        format!("CKPT-MOLE-{}", self.title())
-    }
-}
+// #[cfg(feature = "adhoc")]
+// impl Checkpoint for gchemol::Molecule {
+//     const CKPT_KEY: &'static str = "DEFAULT-MOL-CKPT";
+// }
+
+impl<T> Checkpoint for T where T: Clone + serde::Serialize + serde::de::DeserializeOwned {}
 
 #[cfg(test)]
 mod test {
@@ -127,13 +136,6 @@ mod test {
     #[derive(Clone, Debug, Serialize, Deserialize)]
     struct TestObject {
         data: f64,
-    }
-
-    impl Checkpoint for TestObject {
-        /// Return an unique name as the container for your data.
-        fn checkpoint_key(&self) -> String {
-            "test-obj-chk".into()
-        }
     }
 
     #[test]
@@ -156,7 +158,7 @@ mod test {
         assert_eq!(x.data, 0.0);
 
         // restore from checkpoint
-        #[cfg(feature="adhoc")]
+        #[cfg(feature = "adhoc")]
         assert_eq!(x.get_number_of_checkpoints(&db)?, 3);
         x.restore_from_checkpoint(&db)?;
         assert_eq!(x.data, 0.0);

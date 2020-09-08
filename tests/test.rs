@@ -1,9 +1,4 @@
-// tests
-// :PROPERTIES:
-// :header-args: :tangle tests/test.rs
-// :END:
-
-// [[file:~/Workspace/Programming/gosh-rs/database/database.note::*tests][tests:1]]
+// [[file:../database.note::*tests][tests:1]]
 use gosh_core::*;
 use gosh_database::prelude::*;
 use gosh_database::DbConnection;
@@ -13,20 +8,6 @@ use gut::prelude::*;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct Test {
     data: f64,
-}
-
-impl Collection for Test {
-    /// Return an unique name as the container for your data.
-    fn collection_name() -> String {
-        "test-checkpoint-collection-tmp".into()
-    }
-}
-
-impl Checkpoint for Test {
-    /// Return an unique name as the container for your data.
-    fn checkpoint_key(&self) -> String {
-        "test-obj-chk".into()
-    }
 }
 
 #[test]
