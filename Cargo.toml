@@ -10,6 +10,8 @@ repository = "https://github.com/gosh-rs/gosh-database"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
+structopt = "0.3"
+# clap = "3.0.0-beta.2"
 derivative = "2.1.1"
 diesel = { version = "1", features = ["sqlite"] }
 diesel_migrations = "1"

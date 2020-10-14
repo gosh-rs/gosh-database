@@ -129,6 +129,100 @@ where
 
 impl<T> Checkpoint for T where T: Clone + serde::Serialize + serde::de::DeserializeOwned {}
 
+use gut::cli::*;
+use std::path::{Path, PathBuf};
+
+/// Checkpoint db file
+#[derive(StructOpt, Default, Clone, Debug)]
+pub struct CheckpointDb {
+    /// Path to a checkpoint file for resuming calculation later.
+    #[structopt(long)]
+    chk_file: Option<PathBuf>,
+
+    /// Index of checkpoint frame to restore (0-base). The default is to restore
+    /// from the lastest (--chk-slot=-1)
+    #[structopt(long)]
+    chk_slot: Option<i32>,
+
+    // internal: database connection
+    #[structopt(skip)]
+    db_connection: Option<DbConnection>,
+}
+
+impl CheckpointDb {
+    /// Construct `Checkpoint` from directory.
+    ///
+    /// # Arguments
+    ///
+    /// * d: root directory for checkpoint files
+    ///
+    pub fn new<P: AsRef<Path>>(d: &P) -> Self {
+        let mut chk = Self::default();
+        chk.chk_file = Some(d.as_ref().to_path_buf());
+        chk.create()
+    }
+
+    /// Create missing db_connection field if `chk_file` is not None. Mainly for cmdline uses.
+    pub fn create(&self) -> Self {
+        if let Some(dbfile) = &self.chk_file {
+            let url = format!("{}", dbfile.display());
+            let dbc = DbConnection::connect(&url).expect("failed to connect to db src");
+            let mut chk = self.clone();
+            chk.db_connection = Some(dbc);
+            chk
+        } else {
+            self.to_owned()
+        }
+    }
+}
+
+impl CheckpointDb {
+    /// Restore `chain` from checkpoint. Return true if restored successfuly,
+    /// false otherwise.
+    pub fn restore<T: Checkpoint>(&self, data: &mut T) -> Result<bool> {
+        // use resumed `data` from checkpoint if possible
+        if let Some(db) = &self.db_connection {
+            if let Some(n) = self.chk_slot {
+                if let Err(e) = data.restore_from_checkpoint_n(db, n) {
+                    warn!("failed to restore from checkpoint");
+                    dbg!(e);
+                }
+            } else {
+                if let Err(e) = data.restore_from_checkpoint(db) {
+                    warn!("failed to restore from checkpoint");
+                    dbg!(e);
+                    return Ok(false);
+                }
+            }
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+
+    /// Commit a checkpoint into database. Return true if committed, false
+    /// otherwise.
+    pub fn commit<T: Checkpoint>(&self, data: &T) -> Result<bool> {
+        if let Some(db) = &self.db_connection {
+            data.commit_checkpoint(db)?;
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+
+    /// List available checkpoints in database.
+    #[cfg(feature = "adhoc")]
+    pub fn list<T: Checkpoint>(&self, _: &T) -> Result<bool> {
+        if let Some(db) = &self.db_connection {
+            T::list_checkpoints(db)?;
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

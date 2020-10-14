@@ -18,11 +18,6 @@ mod checkpoint;
 mod collection;
 mod core;
 
-pub mod prelude {
-    pub use crate::checkpoint::*;
-    pub use crate::collection::*;
-}
-
 pub(crate) mod schema;
 // mods:1 ends here
 
@@ -103,3 +98,12 @@ impl DbConnection {
     }
 }
 // base:1 ends here
+
+// [[file:../database.note::*exports][exports:1]]
+pub mod prelude {
+    pub use crate::checkpoint::Checkpoint;
+    pub use crate::collection::Collection;
+}
+
+pub use crate::checkpoint::CheckpointDb;
+// exports:1 ends here
