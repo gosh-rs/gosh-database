@@ -162,6 +162,12 @@ impl CheckpointDb {
         chk.create()
     }
 
+    /// Construct with checkpoint slot `n`.
+    pub fn slot(mut self, n: i32) -> Self {
+        self.chk_slot = Some(n);
+        self
+    }
+
     /// Create missing db_connection field if `chk_file` is not None. Mainly for cmdline uses.
     pub fn create(&self) -> Self {
         if let Some(dbfile) = &self.chk_file {
