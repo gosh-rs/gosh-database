@@ -222,7 +222,7 @@ impl CheckpointDb {
 
     /// List available checkpoints in database.
     #[cfg(feature = "adhoc")]
-    pub fn list<T: Checkpoint>(&self, _: &T) -> Result<bool> {
+    pub fn list<T: Checkpoint>(&self) -> Result<bool> {
         if let Some(db) = &self.db_connection {
             T::list_checkpoints(db)?;
             Ok(true)
