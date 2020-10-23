@@ -156,7 +156,7 @@ impl CheckpointDb {
     ///
     /// * d: root directory for checkpoint files
     ///
-    pub fn new<P: AsRef<Path>>(d: &P) -> Self {
+    pub fn new<P: AsRef<Path>>(d: P) -> Self {
         let mut chk = Self::default();
         chk.chk_file = Some(d.as_ref().to_path_buf());
         chk.create()
@@ -198,6 +198,15 @@ impl CheckpointDb {
         } else {
             Ok(false)
         }
+    }
+
+    /// Return checkpointed `T`
+    pub fn restored<T: Checkpoint>(&self) -> Result<T> {
+        let n = self.chk_slot.unwrap_or(-1);
+        let db = self.db_connection.as_ref().expect("no db connection");
+
+        let x = T::from_checkpoint_n(db, n)?;
+        Ok(x)
     }
 
     /// Commit a checkpoint into database. Return true if committed, false
