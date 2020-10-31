@@ -132,7 +132,6 @@ impl<T> Checkpoint for T where T: Clone + serde::Serialize + serde::de::Deserial
 use gut::cli::*;
 use std::path::{Path, PathBuf};
 
-/// Checkpoint db file
 #[derive(StructOpt, Default, Clone, Debug)]
 pub struct CheckpointDb {
     /// Path to a checkpoint file for resuming calculation later.
