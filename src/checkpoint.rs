@@ -205,13 +205,22 @@ impl CheckpointDb {
         }
     }
 
+    #[deprecated(note = "Please use load_from_latest instead")]
     /// Return checkpointed `T`
     pub fn restored<T: Checkpoint>(&self) -> Result<T> {
-        let n = self.chk_slot.unwrap_or(-1);
-        let db = self.db_connection.as_ref().expect("no db connection");
+        self.load_from_latest()
+    }
 
-        let x = T::from_checkpoint_n(db, n)?;
-        Ok(x)
+    /// Load latest struct `T` from checkpoint
+    pub fn load_from_latest<T: Checkpoint>(&self) -> Result<T> {
+        let n = self.chk_slot.unwrap_or(-1);
+        self.load_from_slot_n(n)
+    }
+
+    /// Load struct `T` from checkpoint in `slot`
+    pub fn load_from_slot_n<T: Checkpoint>(&self, slot: i32) -> Result<T> {
+        let db = self.db_connection.as_ref().expect("no db connection");
+        Ok(T::from_checkpoint_n(db, slot)?)
     }
 
     /// Commit a checkpoint into database. Return true if committed, false
