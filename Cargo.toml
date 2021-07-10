@@ -1,8 +1,8 @@
-# [[file:database.note::*cargo][cargo:1]]
+# [[file:database.note::c0c66bbe][c0c66bbe]]
 [package]
 name = "gosh-database"
 version = "0.0.8"
-edition = "2018"
+edition = "2021"
 authors = ["Wenping Guo <ybyygu@gmail.com>"]
 description = "database for gosh"
 homepage = "https://github.com/gosh-rs/gosh-database"
@@ -11,17 +11,16 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 structopt = "0.3"
-# clap = "3.0.0-beta.2"
 derivative = "2.1.1"
 diesel = { version = "1", features = ["sqlite"] }
 diesel_migrations = "1"
 # Important for statically linking SQLite3
-libsqlite3-sys = { version = "0.9", features = ["bundled"] }
-dotenv = "0.10"
+libsqlite3-sys = { version = "0.22", features = ["bundled"] }
+dotenv = "0.15"
 serde = {version="1", features = ["derive"]}
 serde_json = "1"
 bincode = "1"
-gosh-core = ">=0.0.1"
+gosh-core = "0.0.2"
 gosh-model = ">=0.0.9"
 
 [dev-dependencies]
@@ -30,4 +29,4 @@ tempfile = "3"
 [features]
 # for adhoc hacking
 adhoc = []
-# cargo:1 ends here
+# c0c66bbe ends here
