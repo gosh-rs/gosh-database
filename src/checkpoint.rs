@@ -1,9 +1,7 @@
-use gosh_core::*;
+use super::*;
 
 use crate::schema::*;
 use crate::*;
-
-use gut::prelude::*;
 
 pub trait Checkpoint
 where
@@ -132,7 +130,7 @@ impl<T> Checkpoint for T where T: Clone + serde::Serialize + serde::de::Deserial
 use gut::cli::*;
 use std::path::{Path, PathBuf};
 
-#[derive(StructOpt, Default, Clone, Debug)]
+#[derive(Parser, Default, Clone, Debug)]
 pub struct CheckpointDb {
     /// Path to a checkpoint file for resuming calculation later.
     #[structopt(long)]

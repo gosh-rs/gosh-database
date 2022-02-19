@@ -21,9 +21,8 @@ mod core;
 pub(crate) mod schema;
 // mods:1 ends here
 
-// [[file:../database.note::*base][base:1]]
+// [[file:../database.note::f2af4002][f2af4002]]
 use gosh_core::*;
-
 use gut::prelude::*;
 
 embed_migrations!();
@@ -32,7 +31,7 @@ embed_migrations!();
 #[derivative(Debug)]
 pub struct DbConnection {
     database_url: String,
-    #[derivative(Debug="ignore")]
+    #[derivative(Debug = "ignore")]
     connection: Arc<Mutex<SqliteConnection>>,
 }
 
@@ -43,8 +42,8 @@ impl DbConnection {
         // read vars from .env file
         dotenv::dotenv().ok();
 
-        let database_url = std::env::var("GOSH_DATABASE_URL")
-            .with_context(|| format!("GOSH_DATABASE_URL var not set"))?;
+        let database_url =
+            std::env::var("GOSH_DATABASE_URL").with_context(|| format!("GOSH_DATABASE_URL var not set"))?;
         debug!("Database: {}", database_url);
 
         Self::connect(&database_url)
@@ -97,7 +96,7 @@ impl DbConnection {
         Ok(())
     }
 }
-// base:1 ends here
+// f2af4002 ends here
 
 // [[file:../database.note::*exports][exports:1]]
 pub mod prelude {
