@@ -1,7 +1,7 @@
 # [[file:database.note::c0c66bbe][c0c66bbe]]
 [package]
 name = "gosh-database"
-version = "0.0.9"
+version = "0.1.0"
 edition = "2021"
 authors = ["Wenping Guo <ybyygu@gmail.com>"]
 description = "database for gosh"
@@ -20,8 +20,8 @@ dotenv = "0.15"
 serde = {version="1", features = ["derive"]}
 serde_json = "1"
 bincode = "1"
-gosh-core = "0.0.3"
-gosh-model = "0.0.14"
+gosh-core = "0.1.0"
+gosh-model = "0.1.0"
 
 [dev-dependencies]
 tempfile = "3"
