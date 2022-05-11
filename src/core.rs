@@ -1,6 +1,4 @@
-// pub
-
-// [[file:~/Workspace/Programming/gosh-rs/database/database.note::*pub][pub:1]]
+// [[file:../database.note::cc76e0ae][cc76e0ae]]
 use gosh_core::*;
 
 use crate::schema::*;
@@ -56,9 +54,7 @@ pub struct Properties {
 // }
 
 pub fn save_model_results(mp: &ModelProperties, db: &DbConnection) -> Result<()> {
-    let mol = mp
-        .get_molecule()
-        .expect("model properties has no structure!");
+    let mol = mp.get_molecule().expect("model properties has no structure!");
 
     // save molecule record
     let conn = db.get();
@@ -70,21 +66,11 @@ pub fn save_model_results(mp: &ModelProperties, db: &DbConnection) -> Result<()>
         let row = (
             model_id.eq(1),
             molecule_id.eq(1),
-            data.eq({ bincode::serialize(&mol).unwrap() }),
+            data.eq(bincode::serialize(&mol).unwrap()),
         );
-        diesel::insert_into(properties)
-            .values(&row)
-            .execute(&*conn)?;
+        diesel::insert_into(properties).values(&row).execute(&*conn)?;
     }
-
-    // let row = NewProperties {
-    //     data: { bincode::serialize(&mp).unwrap() },
-    // };
-
-    // diesel::insert_into(properties::table)
-    //     .values(&row)
-    //     .execute(&*conn)?;
 
     Ok(())
 }
-// pub:1 ends here
+// cc76e0ae ends here

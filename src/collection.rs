@@ -22,7 +22,7 @@ where
         let row = (
             collection.eq(cname),
             key.eq(new_key),
-            data.eq({ bincode::serialize(&self).unwrap() }),
+            data.eq(bincode::serialize(&self).unwrap()),
         );
 
         diesel::insert_into(kvstore)
@@ -111,12 +111,4 @@ where
     }
 }
 
-impl<T> Collection for T
-where
-    T: serde::Serialize + serde::de::DeserializeOwned,
-{
-    // /// Return an unique name as the container for your data.
-    // fn collection_name() -> String {
-    //     format!("ckpt-{}", std::any::type_name::<Self>())
-    // }
-}
+impl<T> Collection for T where T: serde::Serialize + serde::de::DeserializeOwned {}

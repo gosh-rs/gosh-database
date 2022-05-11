@@ -51,7 +51,7 @@ where
         let ckpt_key = Self::checkpoint_name();
         let conn = db.get();
 
-        let row = (key.eq(&ckpt_key), data.eq({ bincode::serialize(&self).unwrap() }));
+        let row = (key.eq(&ckpt_key), data.eq(bincode::serialize(&self).unwrap()));
 
         diesel::insert_into(checkpoints)
             .values(&row)

@@ -26,6 +26,9 @@ gosh-model = "0.1.0"
 [dev-dependencies]
 tempfile = "3"
 
+# workspace independent
+[workspace]
+
 [features]
 # for adhoc hacking
 adhoc = []
