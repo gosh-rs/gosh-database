@@ -1,7 +1,7 @@
 # [[file:database.note::c0c66bbe][c0c66bbe]]
 [package]
 name = "gosh-database"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Wenping Guo <ybyygu@gmail.com>"]
 description = "database for gosh"
@@ -27,7 +27,7 @@ gosh-model = "0.1.0"
 tempfile = "3"
 
 # workspace independent
-[workspace]
+# [workspace]
 
 [features]
 # for adhoc hacking

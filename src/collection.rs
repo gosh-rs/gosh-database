@@ -12,7 +12,9 @@ where
         format!("{}.ckpt", std::any::type_name::<Self>())
     }
 
-    /// Put self into collection.
+    /// Put the object into collection with an associated key. If `new_key`
+    /// already exits, the database will attempt to replace the offending row
+    /// instead.
     fn put_into_collection(&self, db: &DbConnection, new_key: &str) -> Result<()> {
         use crate::schema::kvstore::dsl::*;
 
@@ -25,7 +27,7 @@ where
             data.eq(bincode::serialize(&self).unwrap()),
         );
 
-        diesel::insert_into(kvstore)
+        diesel::replace_into(kvstore)
             .values(&row)
             .execute(&*conn)
             .with_context(|| {
@@ -112,3 +114,46 @@ where
 }
 
 impl<T> Collection for T where T: serde::Serialize + serde::de::DeserializeOwned {}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[derive(Clone, Debug, Serialize, Deserialize)]
+    struct TestObject {
+        data: f64,
+    }
+
+    #[test]
+    fn test_collection() -> Result<()> {
+        // setup db in a temp directory
+        let tdir = tempfile::tempdir()?;
+        let tmpdb = tdir.path().join("test.sqlite");
+        let url = format!("{}", tmpdb.display());
+        let db = DbConnection::connect(&url)?;
+
+        let x = TestObject { data: -12.0 };
+        x.put_into_collection(&db, "test1")?;
+
+        TestObject::get_from_collection(&db, "test1")?;
+
+        TestObject::del_from_collection(&db, "test1")?;
+
+        TestObject::remove_collection(&db)?;
+
+        let x = TestObject::list_collection(&db)?;
+        assert!(x.is_empty());
+
+        let x = TestObject { data: 12.0 };
+        x.put_into_collection(&db, "test1")?;
+        let x = TestObject::list_collection(&db)?;
+        assert_eq!(1, x.len());
+
+        let x = TestObject { data: -12.0 };
+        x.put_into_collection(&db, "test1")?;
+        let x_new = TestObject::get_from_collection(&db, "test1")?;
+        assert_eq!(x.data, x_new.data);
+
+        Ok(())
+    }
+}
