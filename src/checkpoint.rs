@@ -147,12 +147,7 @@ pub struct CheckpointDb {
 }
 
 impl CheckpointDb {
-    /// Construct `Checkpoint` from directory.
-    ///
-    /// # Arguments
-    ///
-    /// * d: root directory for checkpoint files
-    ///
+    /// Construct Checkpoint from `path` to a file.
     pub fn new<P: AsRef<Path>>(d: P) -> Self {
         let mut chk = Self::default();
         chk.chk_file = Some(d.as_ref().to_path_buf());
